@@ -1,0 +1,2141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checklist · Entorno Java + WildFly en Windows 11 Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FBFAF7;
+    --bg-card: #FFFFFF;
+    --bg-sidebar: #1F2125;
+    --bg-code: #17181B;
+    --bg-code-inline: #F1EFEA;
+    --bg-warning: #FFF8E6;
+    --bg-info: #EEF5FF;
+    --bg-success: #E8F5EE;
+    --bg-danger: #FFEDED;
+
+    --ink: #1A1A1A;
+    --ink-muted: #5C5A55;
+    --ink-subtle: #8A8782;
+    --ink-on-dark: #FAFAFA;
+    --ink-on-dark-muted: #A3A3A3;
+
+    --accent: #C0392B;
+    --accent-hover: #A02E22;
+    --accent-soft: #FDEDEA;
+
+    --warning: #B8860B;
+    --info: #2563EB;
+    --success: #16A34A;
+    --danger: #C0392B;
+
+    --border: #E8E5DE;
+    --border-strong: #D4D0C7;
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.05);
+
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+
+    --sidebar-width: 300px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.65;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ============= LAYOUT ============= */
+  .app {
+    display: grid;
+    grid-template-columns: var(--sidebar-width) 1fr;
+    min-height: 100vh;
+  }
+
+  /* ============= SIDEBAR ============= */
+  .sidebar {
+    background: var(--bg-sidebar);
+    color: var(--ink-on-dark);
+    padding: 32px 24px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .brand-logo {
+    width: 36px;
+    height: 36px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+
+  .brand-logo svg { width: 20px; height: 20px; stroke: white; }
+
+  .brand-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .brand-subtitle {
+    font-size: 12px;
+    color: var(--ink-on-dark-muted);
+    letter-spacing: 0.02em;
+  }
+
+  .toc {
+    list-style: none;
+  }
+
+  .toc-section-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-on-dark-muted);
+    margin: 24px 0 8px;
+    padding-left: 8px;
+  }
+
+  .toc-section-label:first-child { margin-top: 0; }
+
+  .toc li a {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 7px 10px;
+    color: rgba(255,255,255,0.85);
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    transition: all 0.15s ease;
+    margin-bottom: 1px;
+  }
+
+  .toc li a:hover { background: rgba(255,255,255,0.06); color: white; }
+  .toc li a.active { background: var(--accent); color: white; }
+
+  .toc-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-on-dark-muted);
+    flex-shrink: 0;
+    min-width: 28px;
+  }
+
+  .toc li a.active .toc-num { color: rgba(255,255,255,0.7); }
+
+  .progress-widget {
+    margin-top: 32px;
+    padding: 16px;
+    background: rgba(255,255,255,0.04);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .progress-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-on-dark-muted);
+    margin-bottom: 8px;
+  }
+
+  .progress-count {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 600;
+    color: white;
+    line-height: 1;
+  }
+
+  .progress-count span { color: var(--ink-on-dark-muted); font-weight: 400; }
+
+  .progress-bar {
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 999px;
+    margin-top: 12px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+
+  .reset-btn {
+    margin-top: 12px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.7);
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    width: 100%;
+    transition: all 0.15s;
+  }
+
+  .reset-btn:hover { background: rgba(255,255,255,0.08); color: white; }
+
+  /* ============= MAIN CONTENT ============= */
+  .main {
+    padding: 64px 64px 120px;
+    max-width: 920px;
+  }
+
+  .hero {
+    margin-bottom: 56px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: 52px;
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+    font-variation-settings: "opsz" 144;
+  }
+
+  .lead {
+    font-size: 18px;
+    color: var(--ink-muted);
+    max-width: 640px;
+    line-height: 1.55;
+  }
+
+  .meta {
+    display: flex;
+    gap: 24px;
+    margin-top: 28px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-subtle);
+  }
+
+  .meta strong { color: var(--ink); font-weight: 500; }
+
+  /* ============= SECTIONS ============= */
+  section { margin-bottom: 72px; scroll-margin-top: 32px; }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: 36px;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    margin-bottom: 12px;
+    font-variation-settings: "opsz" 100;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 8px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-number {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-subtle);
+    background: var(--bg-code-inline);
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+  }
+
+  .section-subtitle {
+    font-size: 15px;
+    color: var(--ink-muted);
+    margin-bottom: 32px;
+    max-width: 720px;
+  }
+
+  h3 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+    margin: 36px 0 14px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+
+  h4 {
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 600;
+    margin: 24px 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-muted);
+  }
+
+  p { margin-bottom: 14px; max-width: 720px; }
+
+  ul, ol { margin: 0 0 16px 22px; max-width: 700px; }
+  li { margin-bottom: 6px; }
+
+  strong { font-weight: 600; color: var(--ink); }
+
+  a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.15s;
+  }
+
+  a:hover { border-color: var(--accent); }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    background: var(--bg-code-inline);
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: var(--ink);
+  }
+
+  /* ============= CHECKBOXES ============= */
+  .check-item {
+    display: flex;
+    gap: 14px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+
+  .check-item:hover { border-color: var(--border-strong); }
+
+  .check-item.done {
+    background: #F5F8F5;
+    border-color: #D6E5D6;
+  }
+
+  .check-item.done .check-label {
+    text-decoration: line-through;
+    color: var(--ink-subtle);
+  }
+
+  .check-input {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-strong);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s;
+  }
+
+  .check-input:checked {
+    background: var(--success);
+    border-color: var(--success);
+  }
+
+  .check-input:checked::after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 6px;
+    height: 11px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  .check-label {
+    flex: 1;
+    line-height: 1.55;
+  }
+
+  .check-id {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-subtle);
+    margin-right: 8px;
+  }
+
+  /* ============= CODE BLOCKS ============= */
+  .code-block {
+    position: relative;
+    background: var(--bg-code);
+    color: #E5E5E5;
+    padding: 18px 20px;
+    padding-right: 70px;
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    margin: 16px 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .code-block::before {
+    content: attr(data-lang);
+    position: absolute;
+    top: 8px;
+    left: 16px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.35);
+    font-family: var(--font-mono);
+  }
+
+  .code-block pre {
+    margin-top: 14px;
+    font-family: inherit;
+    white-space: pre;
+  }
+
+  .copy-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.8);
+    border: none;
+    padding: 5px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    transition: all 0.15s;
+  }
+
+  .copy-btn:hover { background: rgba(255,255,255,0.16); color: white; }
+  .copy-btn.copied { background: var(--success); color: white; }
+
+  /* ============= CALLOUTS ============= */
+  .callout {
+    display: flex;
+    gap: 14px;
+    padding: 14px 18px;
+    margin: 18px 0;
+    border-radius: var(--radius-md);
+    border-left: 3px solid;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .callout-icon {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: white;
+    font-family: var(--font-mono);
+  }
+
+  .callout-content { flex: 1; }
+  .callout-title { font-weight: 600; margin-bottom: 4px; display: block; }
+
+  .callout.warning {
+    background: var(--bg-warning);
+    border-color: var(--warning);
+  }
+  .callout.warning .callout-icon { background: var(--warning); }
+
+  .callout.info {
+    background: var(--bg-info);
+    border-color: var(--info);
+  }
+  .callout.info .callout-icon { background: var(--info); }
+
+  .callout.danger {
+    background: var(--bg-danger);
+    border-color: var(--danger);
+  }
+  .callout.danger .callout-icon { background: var(--danger); }
+
+  .callout.success {
+    background: var(--bg-success);
+    border-color: var(--success);
+  }
+  .callout.success .callout-icon { background: var(--success); }
+
+  /* ============= EXPECTED OUTPUT ============= */
+  .expected {
+    background: var(--bg-card);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    white-space: pre-wrap;
+  }
+
+  .expected-label {
+    font-family: var(--font-body);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-subtle);
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  /* ============= TABLES ============= */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  th {
+    text-align: left;
+    padding: 12px 16px;
+    background: var(--bg-code-inline);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  /* ============= LINK BUTTONS ============= */
+  .links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+  }
+
+  .download-link {
+    display: block;
+    padding: 14px 18px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--ink);
+    transition: all 0.15s;
+  }
+
+  .download-link:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .download-link-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .download-link-title::after {
+    content: "↗";
+    font-size: 14px;
+    color: var(--accent);
+  }
+
+  .download-link-meta {
+    font-size: 12px;
+    color: var(--ink-subtle);
+    font-family: var(--font-mono);
+  }
+
+  /* ============= STEP NUMBERS ============= */
+  .step {
+    margin: 24px 0;
+  }
+
+  .step-title {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .step-num {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1;
+    min-width: 36px;
+    font-variation-settings: "opsz" 144;
+  }
+
+  .step-heading {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.3;
+    flex: 1;
+  }
+
+  /* ============= TROUBLESHOOTING ============= */
+  details {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+  details[open] { border-color: var(--border-strong); }
+
+  summary {
+    padding: 14px 18px;
+    cursor: pointer;
+    font-weight: 500;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.15s;
+  }
+
+  summary:hover { background: #FAF8F4; }
+
+  summary::before {
+    content: "▸";
+    font-size: 12px;
+    color: var(--accent);
+    transition: transform 0.2s;
+  }
+
+  details[open] summary::before { transform: rotate(90deg); }
+
+  summary::-webkit-details-marker { display: none; }
+
+  .details-content {
+    padding: 0 18px 18px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+
+  /* ============= RESPONSIVE ============= */
+  @media (max-width: 980px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar {
+      position: relative;
+      height: auto;
+      width: 100%;
+    }
+    .main { padding: 32px 24px 80px; }
+    h1 { font-size: 36px; }
+    h2 { font-size: 26px; }
+  }
+
+  /* ============= PRINT ============= */
+  @media print {
+    .sidebar, .copy-btn, .reset-btn, .progress-widget { display: none; }
+    .app { grid-template-columns: 1fr; }
+    .main { padding: 0; max-width: 100%; }
+    .code-block { break-inside: avoid; }
+    section { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <div>
+        <div class="brand-title">kirkjoserey</div>
+        <div class="brand-subtitle">Setup · Windows 11 Pro</div>
+      </div>
+    </div>
+
+    <ul class="toc">
+      <li class="toc-section-label">Preparación</li>
+      <li><a href="#sec-0"><span class="toc-num">00</span>Antes de empezar</a></li>
+      <li><a href="#sec-1"><span class="toc-num">01</span>Sistema base</a></li>
+
+      <li class="toc-section-label">Stack Java</li>
+      <li><a href="#sec-2"><span class="toc-num">02</span>Java 21 (Temurin)</a></li>
+      <li><a href="#sec-3"><span class="toc-num">03</span>Maven 3.9</a></li>
+
+      <li class="toc-section-label">Stack Web</li>
+      <li><a href="#sec-4"><span class="toc-num">04</span>Node 20 &amp; Claude Code</a></li>
+      <li><a href="#sec-5"><span class="toc-num">05</span>MySQL 8</a></li>
+
+      <li class="toc-section-label">Servidor</li>
+      <li><a href="#sec-6"><span class="toc-num">06</span>WildFly 39 Final</a></li>
+      <li><a href="#sec-7"><span class="toc-num">07</span>Driver MySQL en WildFly</a></li>
+
+      <li class="toc-section-label">Validación</li>
+      <li><a href="#sec-8"><span class="toc-num">08</span>Antivirus &amp; red</a></li>
+      <li><a href="#sec-9"><span class="toc-num">09</span>Test integrador</a></li>
+
+      <li class="toc-section-label">Referencia</li>
+      <li><a href="#sec-10"><span class="toc-num">10</span>Troubleshooting</a></li>
+    </ul>
+
+    <div class="progress-widget">
+      <div class="progress-label">Progreso</div>
+      <div class="progress-count"><span id="done-count">0</span><span> / <span id="total-count">0</span></span></div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <button class="reset-btn" onclick="resetProgress()">Reset</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <header class="hero">
+      <div class="eyebrow">Guía técnica · v2 · Definitiva</div>
+      <h1>Checklist del entorno para desarrollar y desplegar Java&nbsp;EE sobre WildFly</h1>
+      <p class="lead">Una guía consolidada que incorpora todos los aprendizajes y errores corregidos durante la puesta a punto inicial del proyecto (Java+MySQL+JBOSS EE+Maven) sobre Windows 11 Pro.</p>
+      <div class="meta">
+        <span><strong>SO:</strong> Windows 11 Pro 22H2+</span>
+        <span><strong>Java:</strong> 21 LTS</span>
+        <span><strong>Servidor:</strong> WildFly 39.0.1.Final</span>
+      </div>
+    </header>
+
+    <!-- ============= SECCION 0 ============= -->
+    <section id="sec-0">
+      <div class="section-header">
+        <span class="section-number">00</span>
+        <h2>Antes de empezar</h2>
+      </div>
+
+      <p class="section-subtitle">Lecciones aprendidas la primera vuelta. Leelas antes de tocar nada, te ahorra de 1 a 4 horas de troubleshooting.</p>
+
+      <div class="callout danger">
+        <div class="callout-icon">!</div>
+        <div class="callout-content">
+          <strong class="callout-title">Versión exacta de WildFly</strong>
+          Tenés que descargar <strong>WildFly 39.0.1.Final</strong>. La versión 40 (Beta o Final) es incompatible con Spring Boot 3.5 porque implementa Jakarta EE&nbsp;11, mientras que el proyecto usa Jakarta EE&nbsp;10. Si bajás la 40 vas a tener errores de tipo "EntityManagerFactory interface seems to conflict".
+        </div>
+      </div>
+
+      <div class="callout warning">
+        <div class="callout-icon">!</div>
+        <div class="callout-content">
+          <strong class="callout-title">No copies la sección de proxy si no la necesitás</strong>
+          Si no estás detrás de un proxy corporativo, <strong>saltá la Sección 8.2</strong> completa. Configurar un proxy ficticio en <code>~/.m2/settings.xml</code> rompe todas las builds de Maven con "Host desconocido".
+        </div>
+      </div>
+
+      <div class="callout info">
+        <div class="callout-icon">i</div>
+        <div class="callout-content">
+          <strong class="callout-title">PowerShell, no CMD</strong>
+          Todos los comandos están pensados para <strong>PowerShell</strong>. Si abrís CMD, varios no van a funcionar. Usá Windows Terminal si lo tenés, o el ícono de PowerShell del menú inicio.
+        </div>
+      </div>
+
+      <div class="callout info">
+        <div class="callout-icon">i</div>
+        <div class="callout-content">
+          <strong class="callout-title">Cerrá y reabrí la terminal después de cada instalación</strong>
+          Las variables de entorno (PATH, JAVA_HOME, WILDFLY_HOME) solo se refrescan en sesiones nuevas. Esta es la causa #1 de "el comando no se reconoce" después de instalar algo.
+        </div>
+      </div>
+
+      <h3>Convenciones de la guía</h3>
+      <ul>
+        <li><strong>Pasos con casilla</strong> son verificaciones que tenés que poder marcar antes de seguir.</li>
+        <li><strong>Bloques negros</strong> son código para pegar tal cual en PowerShell.</li>
+        <li><strong>Bloques punteados</strong> muestran la salida esperada del comando anterior.</li>
+        <li><strong>Cajas de color</strong> destacan información crítica (rojo), advertencias (amarillo) o tips (azul).</li>
+      </ul>
+    </section>
+
+    <!-- ============= SECCION 1 ============= -->
+    <section id="sec-1">
+      <div class="section-header">
+        <span class="section-number">01</span>
+        <h2>Sistema operativo y herramientas base</h2>
+      </div>
+
+      <p class="section-subtitle">Configuraciones de Windows que tenés que aplicar <em>antes</em> de instalar nada. Si las dejás para después, varias instalaciones se rompen y hay que rehacerlas.</p>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">1</span>
+          <span class="step-heading">Verificar versión de Windows</span>
+        </div>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>winver</pre>
+        </div>
+        <p>Tiene que ser <strong>Windows 11 Pro, versión 22H2 o superior</strong>. Si aparece Windows 10 o una versión 21H1/21H2, actualizá antes de seguir.</p>
+
+        <div class="check-item" data-id="1.1">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">1.1</span> Confirmé Windows 11 Pro 22H2 o superior</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">2</span>
+          <span class="step-heading">Habilitar PowerShell para ejecutar scripts</span>
+        </div>
+        <p>Por defecto Windows bloquea la ejecución de scripts <code>.ps1</code>. Como npm, Claude Code y varias herramientas se invocan así, hay que habilitarlo primero. Abrí PowerShell <strong>como Administrador</strong>:</p>
+        <div class="code-block" data-lang="powershell (admin)">
+          <button class="copy-btn">copy</button>
+          <pre>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</pre>
+        </div>
+        <p>Confirmá con <code>S</code> (o <code>Y</code> en Windows en inglés). Verificá:</p>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>Get-ExecutionPolicy -List</pre>
+        </div>
+        <div class="expected"><span class="expected-label">Salida esperada (línea de CurrentUser)</span>CurrentUser    RemoteSigned</div>
+
+        <div class="check-item" data-id="1.2">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">1.2</span> ExecutionPolicy <code>CurrentUser</code> en <code>RemoteSigned</code></span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">3</span>
+          <span class="step-heading">Habilitar paths largos</span>
+        </div>
+        <p>Windows trunca paths a 260 caracteres por defecto, lo que rompe Maven y npm con dependencias profundas. Como administrador:</p>
+        <div class="code-block" data-lang="powershell (admin)">
+          <button class="copy-btn">copy</button>
+          <pre>New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" `
+  -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force</pre>
+        </div>
+
+        <div class="check-item" data-id="1.3">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">1.3</span> LongPathsEnabled = 1 en el registro</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">4</span>
+          <span class="step-heading">UTF-8 a nivel sistema</span>
+        </div>
+        <p>Tu proyecto está en español. Sin esto, Maven y los archivos con acentos se comportan raro.</p>
+        <ol>
+          <li>Panel de Control → Reloj y región → Región.</li>
+          <li>Tab "Administrativo" → "Cambiar configuración regional del sistema".</li>
+          <li>Marcar la casilla <strong>"Beta: Usar Unicode UTF-8 para compatibilidad de idiomas"</strong>.</li>
+          <li>Reiniciar la máquina.</li>
+        </ol>
+        <p>Después del reinicio verificá:</p>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>[System.Text.Encoding]::Default.WebName</pre>
+        </div>
+        <div class="expected"><span class="expected-label">Salida esperada</span>utf-8</div>
+
+        <div class="check-item" data-id="1.4">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">1.4</span> Codificación del sistema en UTF-8</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">5</span>
+          <span class="step-heading">Espacio en disco</span>
+        </div>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>Get-PSDrive C | Select-Object Used,Free</pre>
+        </div>
+        <p>Necesitás <strong>al menos 20 GB libres</strong>. Maven, MySQL, WildFly y <code>node_modules</code> ocupan bastante.</p>
+
+        <div class="check-item" data-id="1.5">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">1.5</span> Al menos 20 GB libres en C:</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">6</span>
+          <span class="step-heading">Git for Windows</span>
+        </div>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>winget install --id Git.Git -e --source winget</pre>
+        </div>
+        <p>Cerrá y reabrí PowerShell. Después configurá:</p>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>git --version
+git config --global user.name "Tu Nombre"
+git config --global user.email "tu@email.com"
+git config --global core.autocrlf true
+git config --global init.defaultBranch main</pre>
+        </div>
+
+        <div class="links-grid">
+          <a class="download-link" href="https://gitforwindows.org/" target="_blank">
+            <div class="download-link-title">Git for Windows</div>
+            <div class="download-link-meta">gitforwindows.org · instalador alternativo</div>
+          </a>
+        </div>
+
+        <div class="check-item" data-id="1.6">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">1.6</span> Git 2.40+ instalado y configurado (user, email, autocrlf)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============= SECCION 2 ============= -->
+    <section id="sec-2">
+      <div class="section-header">
+        <span class="section-number">02</span>
+        <h2>Java 21 (Eclipse Temurin)</h2>
+      </div>
+
+      <p class="section-subtitle">El runtime base. Java 21 es la versión LTS sobre la que va a correr todo: Spring Boot 3.5, WildFly 39 y la JVM del build.</p>
+
+      <div class="links-grid">
+        <a class="download-link" href="https://adoptium.net/temurin/releases/?version=21&os=windows&arch=x64&package=jdk" target="_blank">
+          <div class="download-link-title">Temurin 21 JDK · Windows x64</div>
+          <div class="download-link-meta">adoptium.net · .msi recomendado</div>
+        </a>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">1</span>
+          <span class="step-heading">Instalar</span>
+        </div>
+        <p>Opción A — Winget:</p>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>winget install --id EclipseAdoptium.Temurin.21.JDK -e</pre>
+        </div>
+        <p>Opción B — Instalador .msi (recomendado si querés controlar las opciones). En el wizard marcá:</p>
+        <ul>
+          <li>✅ Set <code>JAVA_HOME</code> variable</li>
+          <li>✅ Add to PATH</li>
+          <li>✅ Associate .jar files</li>
+        </ul>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">2</span>
+          <span class="step-heading">Verificar (en una terminal nueva)</span>
+        </div>
+        <div class="callout warning">
+          <div class="callout-icon">!</div>
+          <div class="callout-content">
+            Cerrá <em>todas</em> las ventanas de PowerShell abiertas y abrí una nueva. Las variables de entorno no se actualizan en sesiones que ya existían.
+          </div>
+        </div>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>java -version
+javac -version
+echo $env:JAVA_HOME
+where.exe java</pre>
+        </div>
+        <div class="expected"><span class="expected-label">Salida esperada</span>openjdk version "21.0.x" ... LTS
+javac 21.0.x
+C:\Program Files\Eclipse Adoptium\jdk-21.0.x.x-hotspot
+C:\Program Files\Eclipse Adoptium\jdk-21.0.x.x-hotspot\bin\java.exe</div>
+
+        <div class="callout warning">
+          <div class="callout-icon">!</div>
+          <div class="callout-content">
+            <strong class="callout-title">Si <code>where.exe java</code> lista varias rutas</strong>
+            Hay un Java viejo de Oracle que está apareciendo primero. Abrí <code>sysdm.cpl</code> → Variables de entorno → editá el PATH del sistema y borrá las entradas tipo <code>C:\Program Files (x86)\Common Files\Oracle\Java\javapath</code>.
+          </div>
+        </div>
+
+        <div class="check-item" data-id="2.1">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">2.1</span> <code>java -version</code> reporta 21.0.x</span>
+        </div>
+        <div class="check-item" data-id="2.2">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">2.2</span> <code>JAVA_HOME</code> apunta a la carpeta correcta de Temurin 21</span>
+        </div>
+        <div class="check-item" data-id="2.3">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">2.3</span> <code>where.exe java</code> devuelve una sola ruta (Temurin)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============= SECCION 3 ============= -->
+    <section id="sec-3">
+      <div class="section-header">
+        <span class="section-number">03</span>
+        <h2>Apache Maven 3.9</h2>
+      </div>
+
+      <p class="section-subtitle">Build system del backend. Maven 3.9 requiere Java 17+, así que combina bien con Temurin 21.</p>
+
+      <div class="links-grid">
+        <a class="download-link" href="https://maven.apache.org/download.cgi" target="_blank">
+          <div class="download-link-title">Apache Maven · Binaries</div>
+          <div class="download-link-meta">maven.apache.org · ZIP binario</div>
+        </a>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">1</span>
+          <span class="step-heading">Instalar</span>
+        </div>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>winget install --id Apache.Maven -e</pre>
+        </div>
+        <p>Alternativa: descargar el zip, descomprimirlo en <code>C:\Tools\apache-maven-3.9.x</code>, y agregar <code>C:\Tools\apache-maven-3.9.x\bin</code> al PATH del sistema.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">2</span>
+          <span class="step-heading">Verificar</span>
+        </div>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>mvn -version</pre>
+        </div>
+        <p>Tiene que mostrar tres cosas correctas:</p>
+        <ul>
+          <li>"Apache Maven <strong>3.9.x</strong>" (no 3.6, no 3.8)</li>
+          <li>"Java version: <strong>21</strong>" (no 17, no 11)</li>
+          <li>"platform encoding: <strong>UTF-8</strong>" (no Cp1252)</li>
+        </ul>
+
+        <div class="check-item" data-id="3.1">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">3.1</span> Maven 3.9.x reportando Java 21 y UTF-8</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">3</span>
+          <span class="step-heading">Validar que puede bajar de Maven Central</span>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-icon">i</div>
+          <div class="callout-content">
+            <strong class="callout-title">Por qué no usamos <code>archetype:generate</code></strong>
+            En Maven 3.9 ese comando se comporta distinto a versiones anteriores y suele fallar con "no POM in this directory". Validamos con un POM mínimo, que es más confiable.
+          </div>
+        </div>
+
+        <p>Creá una carpeta de prueba:</p>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>mkdir $env:USERPROFILE\test-maven
+cd $env:USERPROFILE\test-maven</pre>
+        </div>
+
+        <p>Generá un <code>pom.xml</code> mínimo:</p>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>$pom = @'
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;project xmlns="http://maven.apache.org/POM/4.0.0"&gt;
+  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+  &lt;groupId&gt;com.test&lt;/groupId&gt;
+  &lt;artifactId&gt;hello&lt;/artifactId&gt;
+  &lt;version&gt;1.0.0&lt;/version&gt;
+  &lt;properties&gt;
+    &lt;maven.compiler.release&gt;21&lt;/maven.compiler.release&gt;
+    &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+  &lt;/properties&gt;
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.junit.jupiter&lt;/groupId&gt;
+      &lt;artifactId&gt;junit-jupiter&lt;/artifactId&gt;
+      &lt;version&gt;5.11.3&lt;/version&gt;
+      &lt;scope&gt;test&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/project&gt;
+'@
+[System.IO.File]::WriteAllText("$env:USERPROFILE\test-maven\pom.xml", $pom, [System.Text.UTF8Encoding]::new($false))</pre>
+        </div>
+
+        <p>Probar:</p>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>mvn dependency:resolve</pre>
+        </div>
+
+        <p>Tiene que terminar en <code>BUILD SUCCESS</code> y haber bajado JUnit y sus transitivas. Limpiá:</p>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>cd $env:USERPROFILE
+Remove-Item -Recurse -Force test-maven</pre>
+        </div>
+
+        <div class="callout danger">
+          <div class="callout-icon">!</div>
+          <div class="callout-content">
+            <strong class="callout-title">Si te falla con "Host desconocido (proxy.empresa.com)"</strong>
+            Hay un proxy ficticio configurado en tu <code>settings.xml</code>. Borralo o desactivalo:<br>
+            <code>Remove-Item $env:USERPROFILE\.m2\settings.xml</code>
+          </div>
+        </div>
+
+        <div class="check-item" data-id="3.2">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">3.2</span> <code>mvn dependency:resolve</code> termina en BUILD SUCCESS</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============= SECCION 4 ============= -->
+    <section id="sec-4">
+      <div class="section-header">
+        <span class="section-number">04</span>
+        <h2>Node.js 20 + Claude Code CLI</h2>
+      </div>
+
+      <p class="section-subtitle">Para el frontend React (Vite) y para usar Claude Code asistiendo el desarrollo.</p>
+
+      <div class="links-grid">
+        <a class="download-link" href="https://nodejs.org/en/download/" target="_blank">
+          <div class="download-link-title">Node.js · LTS</div>
+          <div class="download-link-meta">nodejs.org · .msi para Windows x64</div>
+        </a>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">1</span>
+          <span class="step-heading">Instalar Node 20 LTS</span>
+        </div>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>winget install --id OpenJS.NodeJS.LTS -e</pre>
+        </div>
+
+        <p>Verificá en terminal nueva:</p>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>node -v
+npm -v</pre>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-icon">!</div>
+          <div class="callout-content">
+            <strong class="callout-title">Error "no se puede cargar npm.ps1"</strong>
+            Volvé a la sección 1.2 y aplicá <code>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code> como admin.
+          </div>
+        </div>
+
+        <div class="check-item" data-id="4.1">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">4.1</span> <code>node -v</code> ≥ v20.x · <code>npm -v</code> ≥ 10.x</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">2</span>
+          <span class="step-heading">Configurar prefix de npm fuera de Program Files</span>
+        </div>
+        <p>Evita errores de permisos al instalar paquetes globales:</p>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>mkdir $env:USERPROFILE\.npm-global -Force
+npm config set prefix "$env:USERPROFILE\.npm-global"
+
+$current = [Environment]::GetEnvironmentVariable("Path", "User")
+if (-not ($current -split ";" -contains "$env:USERPROFILE\.npm-global")) {
+  [Environment]::SetEnvironmentVariable("Path", "$current;$env:USERPROFILE\.npm-global", "User")
+}</pre>
+        </div>
+        <p>Cerrá y reabrí PowerShell.</p>
+
+        <div class="check-item" data-id="4.2">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">4.2</span> Prefix de npm apuntando a <code>~/.npm-global</code> y en el PATH</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">3</span>
+          <span class="step-heading">Instalar Claude Code CLI</span>
+        </div>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>npm install -g @anthropic-ai/claude-code
+claude --version</pre>
+        </div>
+
+        <div class="check-item" data-id="4.3">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">4.3</span> <code>claude --version</code> responde</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============= SECCION 5 ============= -->
+    <section id="sec-5">
+      <div class="section-header">
+        <span class="section-number">05</span>
+        <h2>MySQL 8</h2>
+      </div>
+
+      <p class="section-subtitle">Base de datos. La instalación nativa (no Docker) es la más predecible para conectarse desde WildFly.</p>
+
+      <div class="links-grid">
+        <a class="download-link" href="https://dev.mysql.com/downloads/installer/" target="_blank">
+          <div class="download-link-title">MySQL Installer for Windows</div>
+          <div class="download-link-meta">dev.mysql.com · instalador unificado</div>
+        </a>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">1</span>
+          <span class="step-heading">Instalar MySQL Server 8.x</span>
+        </div>
+        <p>En el wizard del instalador:</p>
+        <ul>
+          <li><strong>Setup Type:</strong> Custom (no Developer Default).</li>
+          <li><strong>Productos:</strong> MySQL Server 8.4.x + MySQL Workbench (opcional).</li>
+          <li><strong>Type and Networking:</strong> Development Computer, puerto 3306.</li>
+          <li><strong>Authentication:</strong> Use Strong Password Encryption.</li>
+          <li><strong>Root Password:</strong> anotala.</li>
+          <li><strong>Windows Service:</strong> dejar marcado, "Start at startup".</li>
+        </ul>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">2</span>
+          <span class="step-heading">Agregar MySQL al PATH manualmente</span>
+        </div>
+        <div class="callout warning">
+          <div class="callout-icon">!</div>
+          <div class="callout-content">
+            <strong class="callout-title">El instalador no agrega el PATH automáticamente</strong>
+            Tras instalar, el comando <code>mysql</code> no se reconoce. Hay que agregarlo a mano.
+          </div>
+        </div>
+
+        <p>Encontrá la ruta exacta:</p>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>Get-ChildItem "C:\Program Files\MySQL" -ErrorAction SilentlyContinue</pre>
+        </div>
+
+        <p>Vas a ver algo como <code>MySQL Server 8.4</code>. Agregalo al PATH del sistema (admin):</p>
+        <div class="code-block" data-lang="powershell (admin)">
+          <button class="copy-btn">copy</button>
+          <pre>$mysqlBin = "C:\Program Files\MySQL\MySQL Server 8.4\bin"
+$currentPath = [Environment]::GetEnvironmentVariable("Path", "Machine")
+if (-not ($currentPath -split ";" -contains $mysqlBin)) {
+  [Environment]::SetEnvironmentVariable("Path", "$currentPath;$mysqlBin", "Machine")
+}</pre>
+        </div>
+
+        <p>Cerrá y reabrí PowerShell. Verificá:</p>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>mysql --version</pre>
+        </div>
+
+        <div class="check-item" data-id="5.1">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">5.1</span> <code>mysql --version</code> devuelve 8.4.x</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">3</span>
+          <span class="step-heading">Crear la base y el usuario del proyecto</span>
+        </div>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>mysql -u root -p</pre>
+        </div>
+        <p>Dentro del prompt <code>mysql&gt;</code>:</p>
+        <div class="code-block" data-lang="sql">
+          <button class="copy-btn">copy</button>
+          <pre>CREATE DATABASE testdb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'testdb'@'localhost' IDENTIFIED BY 'testdb';
+GRANT ALL PRIVILEGES ON testdb.* TO 'testdb'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;</pre>
+        </div>
+
+        <p>Verificá:</p>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>mysql -u testdb -ptestdb testdb -e "SELECT 'OK' AS estado;"</pre>
+        </div>
+
+        <div class="check-item" data-id="5.2">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">5.2</span> Conexión con usuario <code>testdb</code> a base <code>testdb</code> funciona</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">4</span>
+          <span class="step-heading">Confirmar que el servicio se inicia automáticamente</span>
+        </div>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>Get-Service | Where-Object {$_.Name -like "*MySQL*"}</pre>
+        </div>
+        <div class="expected"><span class="expected-label">Esperado</span>Status   Name       DisplayName
+------   ----       -----------
+Running  MySQL84    MySQL84</div>
+
+        <div class="check-item" data-id="5.3">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">5.3</span> Servicio MySQL en estado Running</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============= SECCION 6 ============= -->
+    <section id="sec-6">
+      <div class="section-header">
+        <span class="section-number">06</span>
+        <h2>WildFly 39.0.1.Final</h2>
+      </div>
+
+      <p class="section-subtitle">El servidor de aplicaciones donde se va a desplegar el WAR. La versión exacta importa: tiene que ser <strong>39.0.1.Final</strong>, no la 40.</p>
+
+      <div class="callout danger">
+        <div class="callout-icon">!</div>
+        <div class="callout-content">
+          <strong class="callout-title">No descargues WildFly 40 (Beta o Final)</strong>
+          WildFly 40 implementa Jakarta EE&nbsp;11, mientras que Spring Boot 3.5 está pensado para Jakarta EE&nbsp;10. Si bajás la 40 vas a tener errores tipo "EntityManagerFactory interface seems to conflict with Spring's EntityManagerFactoryInfo mixin" al desplegar. Spring Boot 4 será compatible con EE 11 más adelante.
+        </div>
+      </div>
+
+      <div class="links-grid">
+        <a class="download-link" href="https://github.com/wildfly/wildfly/releases/tag/39.0.1.Final" target="_blank">
+          <div class="download-link-title">WildFly 39.0.1.Final · GitHub Releases</div>
+          <div class="download-link-meta">~210 MB · descargar el archivo .zip de Assets</div>
+        </a>
+        <a class="download-link" href="https://www.wildfly.org/downloads/" target="_blank">
+          <div class="download-link-title">Página oficial de downloads</div>
+          <div class="download-link-meta">wildfly.org · listado de todas las versiones</div>
+        </a>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">1</span>
+          <span class="step-heading">Descargar y descomprimir</span>
+        </div>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>mkdir C:\Tools -Force
+cd C:\Tools
+$url = "https://github.com/wildfly/wildfly/releases/download/39.0.1.Final/wildfly-39.0.1.Final.zip"
+Invoke-WebRequest -Uri $url -OutFile wildfly-39.0.1.Final.zip</pre>
+        </div>
+
+        <p><strong>Verificá el tamaño antes de descomprimir:</strong></p>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>Get-Item wildfly-39.0.1.Final.zip | Select-Object Name, @{N='SizeMB';E={[math]::Round($_.Length / 1MB, 2)}}</pre>
+        </div>
+        <div class="expected"><span class="expected-label">Esperado</span>SizeMB ≈ 210</div>
+
+        <div class="callout warning">
+          <div class="callout-icon">!</div>
+          <div class="callout-content">
+            <strong class="callout-title">Si el zip pesa pocos KB</strong>
+            Bajaste un HTML de error, no el zip. Andá a la página de GitHub Releases y descargalo manualmente desde la sección "Assets" del navegador.
+          </div>
+        </div>
+
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>Expand-Archive -Path wildfly-39.0.1.Final.zip -DestinationPath C:\Tools -Force
+Remove-Item wildfly-39.0.1.Final.zip</pre>
+        </div>
+
+        <div class="check-item" data-id="6.1">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">6.1</span> WildFly 39.0.1.Final descomprimido en <code>C:\Tools</code></span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">2</span>
+          <span class="step-heading">Configurar WILDFLY_HOME</span>
+        </div>
+        <div class="code-block" data-lang="powershell (admin)">
+          <button class="copy-btn">copy</button>
+          <pre>[Environment]::SetEnvironmentVariable("WILDFLY_HOME", "C:\Tools\wildfly-39.0.1.Final", "Machine")</pre>
+        </div>
+        <p>Cerrá y reabrí PowerShell:</p>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>echo $env:WILDFLY_HOME</pre>
+        </div>
+
+        <div class="check-item" data-id="6.2">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">6.2</span> <code>$env:WILDFLY_HOME</code> apunta a la carpeta correcta</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">3</span>
+          <span class="step-heading">Confirmar la versión exacta</span>
+        </div>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>Get-Content "$env:WILDFLY_HOME\README.txt" -TotalCount 5</pre>
+        </div>
+        <div class="expected"><span class="expected-label">Esperado</span>WildFly Application Server 39.0.1.Final ...</div>
+
+        <div class="check-item" data-id="6.3">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">6.3</span> Confirmé que es WildFly <strong>39.0.1.Final</strong>, no 40</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">4</span>
+          <span class="step-heading">Primer arranque</span>
+        </div>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>&amp; "$env:WILDFLY_HOME\bin\standalone.bat"</pre>
+        </div>
+        <p>Esperá que termine con una línea tipo:</p>
+        <div class="expected">WFLYSRV0025: WildFly Full 39.0.1.Final (WildFly Core 27.x.x.Final) started in XXXXms</div>
+        <p>Abrí en el navegador: <a href="http://localhost:8080" target="_blank">http://localhost:8080</a> · debe responder la página de bienvenida.</p>
+
+        <div class="check-item" data-id="6.4">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">6.4</span> WildFly arranca y responde en :8080</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">5</span>
+          <span class="step-heading">Crear usuario admin de la consola</span>
+        </div>
+        <p>En otra terminal:</p>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>&amp; "$env:WILDFLY_HOME\bin\add-user.bat"</pre>
+        </div>
+        <p>Respuestas:</p>
+        <ol>
+          <li>"What type of user?" → <code>a</code> (Management User)</li>
+          <li>Username → <code>admin</code></li>
+          <li>Password → algo fuerte (mayúsculas, minúsculas, números, símbolo, 8+ chars)</li>
+          <li>"What groups?" → Enter (vacío)</li>
+          <li>"Used for one AS process to connect to another?" → <code>yes</code></li>
+        </ol>
+        <p>Probá la consola en <a href="http://localhost:9990/console" target="_blank">http://localhost:9990/console</a></p>
+
+        <div class="check-item" data-id="6.5">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">6.5</span> Consola de management accesible con usuario admin</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============= SECCION 7 ============= -->
+    <section id="sec-7">
+      <div class="section-header">
+        <span class="section-number">07</span>
+        <h2>Driver MySQL como módulo en WildFly</h2>
+      </div>
+
+      <p class="section-subtitle">Para que WildFly pueda exponer un datasource JNDI conectado a MySQL, hay que registrar el driver como módulo.</p>
+
+      <div class="links-grid">
+        <a class="download-link" href="https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/9.1.0/mysql-connector-j-9.1.0.jar" target="_blank">
+          <div class="download-link-title">mysql-connector-j 9.1.0 · JAR directo</div>
+          <div class="download-link-meta">Maven Central · ~2.5 MB</div>
+        </a>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">1</span>
+          <span class="step-heading">Descargar el driver</span>
+        </div>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>mkdir C:\Tools\drivers -Force
+Invoke-WebRequest -Uri "https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/9.1.0/mysql-connector-j-9.1.0.jar" `
+  -OutFile C:\Tools\drivers\mysql-connector-j-9.1.0.jar</pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">2</span>
+          <span class="step-heading">Crear el módulo</span>
+        </div>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>$moduleDir = "$env:WILDFLY_HOME\modules\com\mysql\main"
+New-Item -ItemType Directory -Force -Path $moduleDir | Out-Null
+Copy-Item C:\Tools\drivers\mysql-connector-j-9.1.0.jar $moduleDir\</pre>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-icon">!</div>
+          <div class="callout-content">
+            <strong class="callout-title">Crear el module.xml en UTF-8 sin BOM</strong>
+            Si lo creás con Notepad común, agrega un BOM que rompe el parseo XML de WildFly. Usá el comando de abajo, que escribe UTF-8 sin BOM.
+          </div>
+        </div>
+
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>$moduleXml = @'
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;module xmlns="urn:jboss:module:1.9" name="com.mysql"&gt;
+  &lt;resources&gt;
+    &lt;resource-root path="mysql-connector-j-9.1.0.jar"/&gt;
+  &lt;/resources&gt;
+  &lt;dependencies&gt;
+    &lt;module name="java.se"/&gt;
+    &lt;module name="jakarta.transaction.api"/&gt;
+  &lt;/dependencies&gt;
+&lt;/module&gt;
+'@
+
+[System.IO.File]::WriteAllText(
+  "$env:WILDFLY_HOME\modules\com\mysql\main\module.xml",
+  $moduleXml,
+  [System.Text.UTF8Encoding]::new($false)
+)</pre>
+        </div>
+
+        <div class="check-item" data-id="7.1">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">7.1</span> Módulo <code>com.mysql</code> creado con JAR y <code>module.xml</code> (UTF-8 sin BOM)</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">3</span>
+          <span class="step-heading">Registrar driver y datasource</span>
+        </div>
+        <p>Con WildFly corriendo, abrí <strong>otra terminal</strong>:</p>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>&amp; "$env:WILDFLY_HOME\bin\jboss-cli.bat" --connect</pre>
+        </div>
+
+        <p>Dentro del prompt CLI:</p>
+        <div class="code-block" data-lang="jboss-cli">
+          <button class="copy-btn">copy</button>
+          <pre>/subsystem=datasources/jdbc-driver=mysql:add(driver-name=mysql,driver-module-name=com.mysql,driver-class-name=com.mysql.cj.jdbc.Driver)</pre>
+        </div>
+
+        <div class="code-block" data-lang="jboss-cli">
+          <button class="copy-btn">copy</button>
+          <pre>data-source add --name=TestdbDS --jndi-name=java:jboss/datasources/TestdbDS --driver-name=mysql --connection-url=jdbc:mysql://localhost:3306/testdb?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=America/Argentina/Buenos_Aires --user-name=testdb --password=testdb --min-pool-size=5 --max-pool-size=50 --enabled=true --use-java-context=true</pre>
+        </div>
+
+        <div class="code-block" data-lang="jboss-cli">
+          <button class="copy-btn">copy</button>
+          <pre>/subsystem=datasources/data-source=TestdbDS:test-connection-in-pool</pre>
+        </div>
+
+        <div class="expected"><span class="expected-label">Esperado</span>{"outcome" => "success", "result" => [true]}</div>
+
+        <p>Salí del CLI con <code>exit</code>.</p>
+
+        <div class="check-item" data-id="7.2">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">7.2</span> Driver mysql registrado en WildFly</span>
+        </div>
+        <div class="check-item" data-id="7.3">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">7.3</span> Datasource <code>TestdbDS</code> creado y test-connection-in-pool en success</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============= SECCION 8 ============= -->
+    <section id="sec-8">
+      <div class="section-header">
+        <span class="section-number">08</span>
+        <h2>Antivirus y red</h2>
+      </div>
+
+      <p class="section-subtitle">Optimizaciones de entorno que evitan dolor más adelante.</p>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">1</span>
+          <span class="step-heading">Excluir directorios pesados del antivirus</span>
+        </div>
+        <p>Windows Defender escaneando cada <code>.jar</code> que Maven baja hace todo extremadamente lento. Como admin:</p>
+        <div class="code-block" data-lang="powershell (admin)">
+          <button class="copy-btn">copy</button>
+          <pre>Add-MpPreference -ExclusionPath "$env:USERPROFILE\.m2"
+Add-MpPreference -ExclusionPath "$env:USERPROFILE\.npm"
+Add-MpPreference -ExclusionPath "$env:USERPROFILE\.npm-global"
+Add-MpPreference -ExclusionPath "$env:USERPROFILE\source"
+Add-MpPreference -ExclusionPath "$env:USERPROFILE\proyectos"
+Add-MpPreference -ExclusionPath "C:\Tools\wildfly-39.0.1.Final"</pre>
+        </div>
+
+        <div class="check-item" data-id="8.1">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">8.1</span> Exclusiones del antivirus aplicadas</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">2</span>
+          <span class="step-heading">Validar conectividad a los repos</span>
+        </div>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>Invoke-WebRequest -Uri "https://repo.maven.apache.org/maven2/" -UseBasicParsing | Select-Object StatusCode
+Invoke-WebRequest -Uri "https://registry.npmjs.org/" -UseBasicParsing | Select-Object StatusCode
+Invoke-WebRequest -Uri "https://github.com/" -UseBasicParsing | Select-Object StatusCode
+Invoke-WebRequest -Uri "https://api.anthropic.com/" -UseBasicParsing | Select-Object StatusCode</pre>
+        </div>
+        <p>Todas tienen que devolver un código 200 (o 4xx, pero <strong>no</strong> error de red).</p>
+
+        <div class="check-item" data-id="8.2">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">8.2</span> Conectividad a Maven Central, npm, GitHub y Anthropic confirmada</span>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <div class="callout-icon">i</div>
+        <div class="callout-content">
+          <strong class="callout-title">Proxy corporativo · solo si lo necesitás</strong>
+          Si trabajás en una empresa con proxy obligatorio, configuralo con los datos <em>reales</em> de tu organización (no con valores de ejemplo). Si trabajás desde casa o conexión doméstica, <strong>no configures proxy</strong>.
+        </div>
+      </div>
+    </section>
+
+    <!-- ============= SECCION 9 ============= -->
+    <section id="sec-9">
+      <div class="section-header">
+        <span class="section-number">09</span>
+        <h2>Test integrador final</h2>
+      </div>
+
+      <p class="section-subtitle">La prueba real: un WAR de Spring Boot 3.5 generándose, conectándose a MySQL y desplegándose en WildFly 39, todo de punta a punta.</p>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">1</span>
+          <span class="step-heading">Generar un proyecto Spring Boot mínimo</span>
+        </div>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>mkdir $env:USERPROFILE\proyectos\test-stack -Force
+cd $env:USERPROFILE\proyectos\test-stack
+
+Invoke-WebRequest -Uri "https://start.spring.io/starter.zip?type=maven-project&amp;language=java&amp;bootVersion=3.5.13&amp;groupId=com.test&amp;artifactId=demo&amp;name=demo&amp;packageName=com.test.demo&amp;packaging=war&amp;javaVersion=21&amp;dependencies=web,data-jpa,mysql,flyway" `
+  -OutFile demo.zip
+Expand-Archive demo.zip -DestinationPath . -Force
+Remove-Item demo.zip
+cd demo</pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">2</span>
+          <span class="step-heading">Crear application.properties con la conexión a MySQL</span>
+        </div>
+        <div class="callout warning">
+          <div class="callout-icon">!</div>
+          <div class="callout-content">
+            Sin este archivo, Spring Boot falla con "Failed to determine a suitable driver class" porque ve <code>spring-boot-starter-data-jpa</code> en el classpath pero no encuentra config.
+          </div>
+        </div>
+
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>$config = @'
+spring.datasource.url=jdbc:mysql://localhost:3306/testdb?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=America/Argentina/Buenos_Aires&amp;characterEncoding=utf8
+spring.datasource.username=testdb
+spring.datasource.password=testdb
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+spring.jpa.hibernate.ddl-auto=none
+spring.jpa.open-in-view=false
+spring.flyway.enabled=false
+
+logging.level.org.springframework=INFO
+'@
+
+[System.IO.File]::WriteAllText(
+  "$env:USERPROFILE\proyectos\test-stack\demo\src\main\resources\application.properties",
+  $config,
+  [System.Text.UTF8Encoding]::new($false)
+)</pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">3</span>
+          <span class="step-heading">Crear jboss-deployment-structure.xml</span>
+        </div>
+        <div class="callout warning">
+          <div class="callout-icon">!</div>
+          <div class="callout-content">
+            Sin este archivo, el deploy falla con "LoggerFactory is not a Logback LoggerContext" por colisión entre el Logback embebido en Spring Boot y el logger nativo de WildFly.
+          </div>
+        </div>
+
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>mkdir src\main\webapp\WEB-INF -Force | Out-Null
+
+$jdsXml = @'
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;jboss-deployment-structure xmlns="urn:jboss:deployment-structure:1.3"&gt;
+  &lt;deployment&gt;
+    &lt;exclude-subsystems&gt;
+      &lt;subsystem name="logging"/&gt;
+    &lt;/exclude-subsystems&gt;
+    &lt;exclusions&gt;
+      &lt;module name="org.apache.commons.logging"/&gt;
+      &lt;module name="org.apache.log4j"/&gt;
+      &lt;module name="org.jboss.logging"/&gt;
+      &lt;module name="org.jboss.logging.jul-to-slf4j-stub"/&gt;
+      &lt;module name="org.jboss.logmanager"/&gt;
+      &lt;module name="org.slf4j"/&gt;
+      &lt;module name="org.slf4j.impl"/&gt;
+    &lt;/exclusions&gt;
+  &lt;/deployment&gt;
+&lt;/jboss-deployment-structure&gt;
+'@
+
+[System.IO.File]::WriteAllText(
+  "$env:USERPROFILE\proyectos\test-stack\demo\src\main\webapp\WEB-INF\jboss-deployment-structure.xml",
+  $jdsXml,
+  [System.Text.UTF8Encoding]::new($false)
+)</pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">4</span>
+          <span class="step-heading">Compilar</span>
+        </div>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>mvn clean package -DskipTests</pre>
+        </div>
+        <p>Tiene que terminar en <code>BUILD SUCCESS</code> con el WAR en <code>target\demo-0.0.1-SNAPSHOT.war</code>.</p>
+
+        <p>Verificá que el WAR incluye los archivos correctos:</p>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>&amp; "$env:JAVA_HOME\bin\jar.exe" tf target\demo-0.0.1-SNAPSHOT.war | Select-String "jboss-deployment|application.properties"</pre>
+        </div>
+        <div class="expected"><span class="expected-label">Esperado</span>WEB-INF/classes/application.properties
+WEB-INF/jboss-deployment-structure.xml</div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">5</span>
+          <span class="step-heading">Desplegar</span>
+        </div>
+        <p>Con WildFly corriendo:</p>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>Remove-Item "$env:WILDFLY_HOME\standalone\deployments\demo-0.0.1-SNAPSHOT.war*" -ErrorAction SilentlyContinue
+Copy-Item target\demo-0.0.1-SNAPSHOT.war "$env:WILDFLY_HOME\standalone\deployments\"</pre>
+        </div>
+
+        <p>Esperá 20-30 segundos y confirmá:</p>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>Get-ChildItem "$env:WILDFLY_HOME\standalone\deployments\demo-0.0.1-SNAPSHOT.war*"</pre>
+        </div>
+        <p>Tiene que aparecer un archivo <code>.deployed</code> (no <code>.failed</code>).</p>
+
+        <p>Verificá el log:</p>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>Get-Content "$env:WILDFLY_HOME\standalone\log\server.log" -Tail 30</pre>
+        </div>
+        <div class="expected">Started DemoApplication in X.XXX seconds
+WFLYUT0021: Registered web context: '/demo-0.0.1-SNAPSHOT'
+WFLYSRV0010: Deployed "demo-0.0.1-SNAPSHOT.war"</div>
+
+        <p>Abrí <a href="http://localhost:8080/demo-0.0.1-SNAPSHOT/" target="_blank">http://localhost:8080/demo-0.0.1-SNAPSHOT/</a> · una página de error 404 de Spring Boot es éxito (la app está respondiendo HTTP, simplemente no tiene controllers).</p>
+
+        <div class="check-item" data-id="9.1">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">9.1</span> WAR generado y archivo <code>.deployed</code> en WildFly</span>
+        </div>
+        <div class="check-item" data-id="9.2">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">9.2</span> Log muestra "Started DemoApplication" + "Registered web context"</span>
+        </div>
+        <div class="check-item" data-id="9.3">
+          <input type="checkbox" class="check-input">
+          <span class="check-label"><span class="check-id">9.3</span> El navegador responde en la URL de la app</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-num">6</span>
+          <span class="step-heading">Limpieza</span>
+        </div>
+        <div class="code-block" data-lang="powershell">
+          <button class="copy-btn">copy</button>
+          <pre>&amp; "$env:WILDFLY_HOME\bin\jboss-cli.bat" --connect command=:shutdown
+Remove-Item "$env:WILDFLY_HOME\standalone\deployments\demo-0.0.1-SNAPSHOT.war*"
+cd $env:USERPROFILE\proyectos
+Remove-Item -Recurse -Force test-stack</pre>
+        </div>
+
+        <div class="callout success">
+          <div class="callout-icon">✓</div>
+          <div class="callout-content">
+            <strong class="callout-title">Entorno validado</strong>
+            Si llegaste hasta acá con todo en verde, el entorno está listo para arrancar con el proyecto TestDB. Java 21 + Maven 3.9 + MySQL 8 + WildFly 39 conversan correctamente y el ciclo build → deploy → ejecución funciona.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============= SECCION 10 ============= -->
+    <section id="sec-10">
+      <div class="section-header">
+        <span class="section-number">10</span>
+        <h2>Troubleshooting · errores comunes</h2>
+      </div>
+
+      <p class="section-subtitle">Catálogo de errores que aparecen seguido durante la instalación, con su causa y la solución.</p>
+
+      <details>
+        <summary>"No se puede cargar el archivo npm.ps1 porque la ejecución de scripts está deshabilitada"</summary>
+        <div class="details-content">
+          <p><strong>Causa:</strong> Windows bloquea scripts <code>.ps1</code> por defecto.</p>
+          <p><strong>Solución:</strong> PowerShell como admin → <code>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code> → confirmar con S → cerrar y reabrir terminal.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>"mysql: El término 'mysql' no se reconoce"</summary>
+        <div class="details-content">
+          <p><strong>Causa:</strong> El instalador de MySQL no agrega <code>bin</code> al PATH del sistema.</p>
+          <p><strong>Solución:</strong> Sección 5 paso 2 de esta guía. Agregar manualmente <code>C:\Program Files\MySQL\MySQL Server 8.4\bin</code> al PATH del sistema y reabrir terminal.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Maven: "Host desconocido (proxy.empresa.com)"</summary>
+        <div class="details-content">
+          <p><strong>Causa:</strong> Hay un proxy ficticio configurado en <code>~/.m2/settings.xml</code>.</p>
+          <p><strong>Solución:</strong> <code>Remove-Item $env:USERPROFILE\.m2\settings.xml</code>. Si necesitás proxy real, configuralo con los datos verdaderos de tu organización.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Maven: "no POM in this directory" con archetype:generate</summary>
+        <div class="details-content">
+          <p><strong>Causa:</strong> Maven 3.9.x cambió cómo invoca plugins sin POM en el directorio.</p>
+          <p><strong>Solución:</strong> No uses <code>archetype:generate</code> para validar. Usá un POM mínimo y <code>mvn dependency:resolve</code> (sección 3 paso 3 de esta guía).</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>WildFly: "LoggerFactory is not a Logback LoggerContext but Logback is on the classpath"</summary>
+        <div class="details-content">
+          <p><strong>Causa:</strong> Conflicto entre el Logback que viene en el WAR de Spring Boot y el subsistema de logging de WildFly.</p>
+          <p><strong>Solución:</strong> Agregar <code>src/main/webapp/WEB-INF/jboss-deployment-structure.xml</code> excluyendo los módulos de logging (sección 9 paso 3).</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Spring Boot: "Failed to determine a suitable driver class"</summary>
+        <div class="details-content">
+          <p><strong>Causa:</strong> Spring Boot auto-configura un DataSource pero no encuentra config de conexión.</p>
+          <p><strong>Solución:</strong> Crear <code>application.properties</code> con <code>spring.datasource.url</code>, <code>username</code>, <code>password</code>, <code>driver-class-name</code> y deshabilitar Flyway si no hay migraciones (sección 9 paso 2).</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>WildFly: "EntityManagerFactory interface [interface org.hibernate.SessionFactory] seems to conflict"</summary>
+        <div class="details-content">
+          <p><strong>Causa:</strong> Estás corriendo WildFly 40 (Jakarta EE 11) con Spring Boot 3.5 (Jakarta EE 10).</p>
+          <p><strong>Solución:</strong> Verificá la versión con <code>Get-Content "$env:WILDFLY_HOME\README.txt" -TotalCount 5</code>. Si dice 40, descargá WildFly 39.0.1.Final y reapuntá <code>WILDFLY_HOME</code>.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>WildFly: el zip descargado pesa unos pocos KB</summary>
+        <div class="details-content">
+          <p><strong>Causa:</strong> La URL falló y bajaste un HTML de error en vez del binario.</p>
+          <p><strong>Solución:</strong> Ir manualmente a <a href="https://github.com/wildfly/wildfly/releases/tag/39.0.1.Final" target="_blank">GitHub Releases</a> y descargar el zip desde la sección "Assets" del navegador. El archivo debe pesar ~210 MB.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>"JAVA_HOME no está definido" al arrancar WildFly o Maven</summary>
+        <div class="details-content">
+          <p><strong>Causa:</strong> La variable se seteó pero la terminal no la refrescó.</p>
+          <p><strong>Solución:</strong> Cerrar TODAS las ventanas de PowerShell y abrir una nueva. Si tampoco lo toma, reiniciar la sesión de Windows.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>where.exe java muestra varias rutas</summary>
+        <div class="details-content">
+          <p><strong>Causa:</strong> Hay un Java viejo (típicamente Oracle) en el PATH antes que Temurin 21.</p>
+          <p><strong>Solución:</strong> Win+R → <code>sysdm.cpl</code> → Variables de entorno → editar PATH del sistema → eliminar entradas <code>Oracle\Java\javapath</code>, asegurarte que <code>%JAVA_HOME%\bin</code> queda arriba.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>MySQL: "Public Key Retrieval is not allowed"</summary>
+        <div class="details-content">
+          <p><strong>Causa:</strong> MySQL 8 usa caching_sha2_password por defecto y no envía la clave pública si la conexión no es SSL.</p>
+          <p><strong>Solución:</strong> Agregar <code>&amp;allowPublicKeyRetrieval=true</code> al <code>connection-url</code>, tanto en <code>application.properties</code> como en el datasource de WildFly.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Maven build extremadamente lento</summary>
+        <div class="details-content">
+          <p><strong>Causa:</strong> Antivirus escaneando cada JAR descargado al <code>.m2</code>.</p>
+          <p><strong>Solución:</strong> Aplicar exclusiones del antivirus de la sección 8.1 y reiniciar la terminal. La primera build siempre es lenta (baja todo Spring Boot); las siguientes son rápidas.</p>
+        </div>
+      </details>
+    </section>
+
+    <footer style="margin-top: 80px; padding-top: 32px; border-top: 1px solid var(--border); color: var(--ink-subtle); font-size: 13px;">
+      <p>Documento técnico generado para el proyecto <strong>Testdb</strong>. Versión consolidada con correcciones de los errores encontrados en la primera puesta a punto del entorno: PowerShell ExecutionPolicy, proxy ficticio en Maven, MySQL fuera del PATH, conflicto Logback/JBoss en WildFly, DataSource sin configurar en Spring Boot, e incompatibilidad WildFly 40 / Jakarta EE 11.</p>
+      <p style="margin-top: 16px;">Si volvés a esta guía: el progreso de los checks se guarda en tu navegador (localStorage), así que podés cerrar y retomar.</p>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+  // ===== Checkbox persistence =====
+  const STORAGE_KEY = 'baqueano-setup-progress';
+
+  function loadProgress() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    } catch (e) { return {}; }
+  }
+
+  function saveProgress(state) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function updateProgressWidget() {
+    const items = document.querySelectorAll('.check-item');
+    const total = items.length;
+    let done = 0;
+    items.forEach(i => { if (i.classList.contains('done')) done++; });
+    document.getElementById('done-count').textContent = done;
+    document.getElementById('total-count').textContent = total;
+    const pct = total > 0 ? (done / total) * 100 : 0;
+    document.getElementById('progress-fill').style.width = pct + '%';
+  }
+
+  function initChecks() {
+    const state = loadProgress();
+    document.querySelectorAll('.check-item').forEach(item => {
+      const id = item.dataset.id;
+      const input = item.querySelector('.check-input');
+      if (state[id]) {
+        input.checked = true;
+        item.classList.add('done');
+      }
+      // Click on item toggles checkbox
+      item.addEventListener('click', (e) => {
+        if (e.target !== input) {
+          input.checked = !input.checked;
+        }
+        if (input.checked) {
+          item.classList.add('done');
+        } else {
+          item.classList.remove('done');
+        }
+        const newState = loadProgress();
+        newState[id] = input.checked;
+        saveProgress(newState);
+        updateProgressWidget();
+      });
+    });
+    updateProgressWidget();
+  }
+
+  function resetProgress() {
+    if (confirm('¿Borrar todo el progreso?')) {
+      localStorage.removeItem(STORAGE_KEY);
+      document.querySelectorAll('.check-item').forEach(item => {
+        item.classList.remove('done');
+        item.querySelector('.check-input').checked = false;
+      });
+      updateProgressWidget();
+    }
+  }
+
+  // ===== Copy buttons =====
+  function initCopyButtons() {
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const block = btn.closest('.code-block');
+        const code = block.querySelector('pre').textContent;
+        try {
+          await navigator.clipboard.writeText(code);
+          btn.textContent = 'copiado';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = 'copy';
+            btn.classList.remove('copied');
+          }, 1500);
+        } catch (err) {
+          btn.textContent = 'error';
+          setTimeout(() => { btn.textContent = 'copy'; }, 1500);
+        }
+      });
+    });
+  }
+
+  // ===== Active TOC item on scroll =====
+  function initScrollSpy() {
+    const sections = document.querySelectorAll('section[id]');
+    const links = document.querySelectorAll('.toc a');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          links.forEach(l => l.classList.remove('active'));
+          const activeLink = document.querySelector(`.toc a[href="#${id}"]`);
+          if (activeLink) activeLink.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+
+    sections.forEach(s => observer.observe(s));
+  }
+
+  // ===== Init =====
+  document.addEventListener('DOMContentLoaded', () => {
+    initChecks();
+    initCopyButtons();
+    initScrollSpy();
+  });
+</script>
+</body>
+</html>
